@@ -1,14 +1,14 @@
-<div align="center">
+<p align="center"><img src="./assets/banner.svg" alt="AI Agent Production Checklist banner" width="100%" /></p>
 
 # AI Agent Production Checklist
 
-### Build agents that can be trusted, tested, observed and stopped.
-
 **Checklist público para projetar, avaliar, proteger e operar agentes de IA em produção.**
 
-`agentic-ai` · `guardrails` · `tool-calling` · `RAG` · `MCP` · `evals` · `observability` · `security`
+| Status | Foco | Qualidade |
+|---|---|---|
+| `v0.1 · foundation` | segurança, tools, RAG, evals e operação | GitHub Actions · docs quality · secret scan |
 
-</div>
+`agentic-ai` · `guardrails` · `tool-calling` · `RAG` · `MCP` · `evals` · `observability` · `security`
 
 ---
 
