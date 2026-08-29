@@ -1,0 +1,21 @@
+[project]
+name = "safe-agent-api"
+version = "0.1.0"
+description = "Deterministic safety policy demo for AI agent tool execution"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi[standard]==0.141.1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "httpx==0.28.1",
+  "pytest==8.4.2",
+]
+
+[tool.fastapi]
+entrypoint = "app.main:app"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
