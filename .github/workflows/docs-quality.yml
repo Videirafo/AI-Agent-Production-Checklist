@@ -1,0 +1,50 @@
+name: Docs Quality
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Required files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s README.md
+          test -s SECURITY.md
+          test -s CONTRIBUTING.md
+          test -s docs/CHECKLIST.md
+          test -s docs/THREAT_MODEL.md
+          test -s docs/RAG_MEMORY.md
+          test -s docs/EVALS_OBSERVABILITY.md
+          test -s templates/PRODUCTION_READINESS_CHECKLIST.md
+          test -s templates/TOOL_POLICY_TEMPLATE.md
+          test -s templates/THREAT_MODEL_TEMPLATE.md
+
+      - name: Common secret patterns
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RIE --exclude-dir=.git --exclude='*.yml' \
+            '(ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-proj-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' .; then
+            echo 'Potential secret pattern found.'
+            exit 1
+          fi
+
+      - name: No real env files
+        shell: bash
+        run: |
+          set -euo pipefail
+          if find . -type f \( -name '.env' -o -name '.env.*' \) ! -name '.env.example' | grep -q .; then
+            echo 'Real env file found.'
+            exit 1
+          fi
