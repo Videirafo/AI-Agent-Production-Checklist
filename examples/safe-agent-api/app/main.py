@@ -1,12 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, PlainTextResponse, Response
 
 from app.discovery import (
     AGENTS_MD,
+    DISCOVERY_BODY_HTML,
     HEAD_DISCOVERY_HTML,
     LLMS_FULL_TXT,
     LLMS_TXT,
     PLAYGROUND_MD,
+    RELEASE_VERSION,
     ROBOTS_TXT,
     SITEMAP_MD,
     SITEMAP_XML,
@@ -23,32 +25,49 @@ from app.policy import evaluate_tool
 
 app = FastAPI(
     title="Safe Agent API",
-    version="0.5.0",
+    version=RELEASE_VERSION,
     description="Deterministic policy, approval and audit layer for agent tool execution demos.",
 )
 
 
-@app.get("/", response_class=HTMLResponse, include_in_schema=False)
-def playground() -> HTMLResponse:
+MARKDOWN_HEADERS = {
+    "Link": '</>; rel="canonical", </sitemap.md>; rel="sitemap"',
+    "X-Robots-Tag": "index, follow, max-snippet:-1, max-image-preview:large",
+}
+
+
+@app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse, include_in_schema=False)
+def playground(request: Request) -> Response:
+    accept = request.headers.get("accept", "").lower()
+    if request.method == "GET" and "text/markdown" in accept:
+        return PlainTextResponse(
+            PLAYGROUND_MD,
+            media_type="text/markdown",
+            headers=MARKDOWN_HEADERS,
+        )
+
     html = PLAYGROUND_HTML.replace("</head>", f"{HEAD_DISCOVERY_HTML}</head>")
+    html = html.replace('<p class="footer">', f'{DISCOVERY_BODY_HTML}<p class="footer">')
     return HTMLResponse(
         html,
         headers={
             "Cache-Control": "no-store",
             "Content-Security-Policy": (
                 "default-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; "
-                "connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'"
+                "connect-src 'self'; img-src 'self' data: https://raw.githubusercontent.com; "
+                "frame-ancestors 'none'"
             ),
-            "Link": '</llms.txt>; rel="describedby", </playground.md>; rel="alternate"; type="text/markdown"',
+            "Link": '</llms.txt>; rel="describedby", </index.md>; rel="alternate"; type="text/markdown"',
             "Referrer-Policy": "no-referrer",
             "X-Content-Type-Options": "nosniff",
+            "X-Robots-Tag": "index, follow, max-snippet:-1, max-image-preview:large",
         },
     )
 
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok", "service": "safe-agent-api", "version": "0.5.0"}
+    return {"status": "ok", "service": "safe-agent-api", "version": RELEASE_VERSION}
 
 
 @app.get("/llms.txt", response_class=PlainTextResponse, include_in_schema=False)
@@ -81,12 +100,13 @@ def agents_md() -> PlainTextResponse:
     return PlainTextResponse(AGENTS_MD, media_type="text/markdown")
 
 
+@app.get("/index.md", response_class=PlainTextResponse, include_in_schema=False)
 @app.get("/playground.md", response_class=PlainTextResponse, include_in_schema=False)
 def playground_md() -> PlainTextResponse:
     return PlainTextResponse(
         PLAYGROUND_MD,
         media_type="text/markdown",
-        headers={"Link": '</sitemap.md>; rel="sitemap"'},
+        headers=MARKDOWN_HEADERS,
     )
 
 
