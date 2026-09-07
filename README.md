@@ -4,6 +4,7 @@
 
 <p align="center">
   <a href="https://github.com/Videirafo/AI-Agent-Production-Checklist/actions"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/Videirafo/AI-Agent-Production-Checklist/example-safe-agent.yml?branch=main&label=tests"></a>
+  <a href="https://github.com/Videirafo/AI-Agent-Production-Checklist/actions/workflows/demo-assets.yml"><img alt="Verified Demo Assets" src="https://img.shields.io/github/actions/workflow/status/Videirafo/AI-Agent-Production-Checklist/demo-assets.yml?branch=main&label=verified%20demo"></a>
   <a href="./LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
   <img alt="GitHub stars" src="https://img.shields.io/github/stars/Videirafo/AI-Agent-Production-Checklist?style=social">
 </p>
@@ -12,9 +13,23 @@
 
 | Status | Projeto executável | Qualidade |
 |---|---|---|
-| `v0.5` | **Safe Agent Playground + API** | GitHub Actions · pytest · CodeQL · Docker · Codespaces · Vercel-ready |
+| `v0.5` | **Safe Agent Playground + API** | GitHub Actions · pytest · CodeQL · Docker · Codespaces · verified browser demo |
 
 `agentic-ai` · `guardrails` · `tool-calling` · `RAG` · `MCP` · `evals` · `observability` · `security`
+
+## Veja o Playground em segundos
+
+<p align="center">
+  <img src="./assets/demo/safe-agent-demo.gif" alt="Safe Agent Playground executing verified policy scenarios" width="760" />
+</p>
+
+O GIF acima não é mockup: o workflow **Verified Demo Assets** inicia a FastAPI real, abre o Playground em Chromium com Playwright, executa cenários de autorização e gera os frames usados na animação.
+
+<details>
+<summary><strong>Abrir screenshot completo verificado</strong></summary>
+<br />
+<p align="center"><img src="./assets/demo/safe-agent-playground.png" alt="Safe Agent Playground full screenshot" width="100%" /></p>
+</details>
 
 ## Use agora
 
