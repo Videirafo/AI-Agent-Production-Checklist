@@ -11,16 +11,26 @@
 
 **Checklist + aplicação executável para projetar, avaliar, proteger e operar agentes de IA em produção.**
 
+## 🚀 Live Demo
+
+**[Open the Safe Agent Playground →](https://safe-agent-playground.onrender.com/)**
+
+- Playground: https://safe-agent-playground.onrender.com/
+- OpenAPI / Swagger: https://safe-agent-playground.onrender.com/docs
+- Health: https://safe-agent-playground.onrender.com/health
+
+> Hosted on Render Free. The service may cold-start after an idle period.
+
 | Status | Projeto executável | Qualidade |
 |---|---|---|
-| `v0.5` | **Safe Agent Playground + API** | GitHub Actions · pytest · CodeQL · Docker · Codespaces · verified browser demo |
+| `v0.6` | **Safe Agent Playground + API** | GitHub Actions · pytest · CodeQL · Docker · Codespaces · verified browser demo · Render live |
 
 `agentic-ai` · `guardrails` · `tool-calling` · `RAG` · `MCP` · `evals` · `observability` · `security`
 
 ## Veja o Playground em segundos
 
 <p align="center">
-  <img src="./assets/demo/safe-agent-demo.gif" alt="Safe Agent Playground executing verified policy scenarios" width="760" />
+  <a href="https://safe-agent-playground.onrender.com/"><img src="./assets/demo/safe-agent-demo.gif" alt="Safe Agent Playground executing verified policy scenarios" width="760" /></a>
 </p>
 
 O GIF acima não é mockup: o workflow **Verified Demo Assets** inicia a FastAPI real, abre o Playground em Chromium com Playwright, executa cenários de autorização e gera os frames usados na animação.
@@ -33,6 +43,10 @@ O GIF acima não é mockup: o workflow **Verified Demo Assets** inicia a FastAPI
 
 ## Use agora
 
+### Sem instalar nada
+
+Abra **https://safe-agent-playground.onrender.com/** e execute os cinco cenários no navegador.
+
 ### 1 clique: GitHub Codespaces
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/Videirafo/AI-Agent-Production-Checklist?quickstart=1)
@@ -43,7 +57,7 @@ O Codespace instala as dependências, inicia a FastAPI e encaminha a porta `8000
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FVideirafo%2FAI-Agent-Production-Checklist&root-directory=examples%2Fsafe-agent-api&project-name=safe-agent-api&repository-name=safe-agent-api)
 
-O exemplo possui entrypoint explícito para FastAPI no Vercel e não exige secrets, banco ou provider de IA.
+Também existe um `render.yaml` na raiz para deploy via Render Blueprint.
 
 ### Docker local
 
@@ -127,6 +141,8 @@ Para quem prefere contribuir com código:
 - [Production readiness](./templates/PRODUCTION_READINESS_CHECKLIST.md)
 - [Tool policy template](./templates/TOOL_POLICY_TEMPLATE.md)
 - [Threat model template](./templates/THREAT_MODEL_TEMPLATE.md)
+- [Render deployment](./docs/DEPLOY_RENDER.md)
+- [Launch kit](./docs/LAUNCH.md)
 
 ## Contribua
 
