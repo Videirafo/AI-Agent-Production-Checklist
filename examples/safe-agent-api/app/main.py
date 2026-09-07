@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
 
 from app.models import (
     AuditEvent,
@@ -7,18 +8,35 @@ from app.models import (
     ToolCheckRequest,
     ToolDecision,
 )
+from app.playground import PLAYGROUND_HTML
 from app.policy import evaluate_tool
 
 app = FastAPI(
     title="Safe Agent API",
-    version="0.2.0",
-    description="Deterministic policy and audit layer for agent tool execution demos.",
+    version="0.5.0",
+    description="Deterministic policy, approval and audit layer for agent tool execution demos.",
 )
+
+
+@app.get("/", response_class=HTMLResponse, include_in_schema=False)
+def playground() -> HTMLResponse:
+    return HTMLResponse(
+        PLAYGROUND_HTML,
+        headers={
+            "Cache-Control": "no-store",
+            "Content-Security-Policy": (
+                "default-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; "
+                "connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'"
+            ),
+            "Referrer-Policy": "no-referrer",
+            "X-Content-Type-Options": "nosniff",
+        },
+    )
 
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok", "service": "safe-agent-api"}
+    return {"status": "ok", "service": "safe-agent-api", "version": "0.5.0"}
 
 
 @app.post("/v1/tool-check", response_model=ToolDecision)

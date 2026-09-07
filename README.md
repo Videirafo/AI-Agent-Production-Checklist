@@ -8,17 +8,29 @@
   <img alt="GitHub stars" src="https://img.shields.io/github/stars/Videirafo/AI-Agent-Production-Checklist?style=social">
 </p>
 
-**Checklist + API executável para projetar, avaliar, proteger e operar agentes de IA em produção.**
+**Checklist + aplicação executável para projetar, avaliar, proteger e operar agentes de IA em produção.**
 
 | Status | Projeto executável | Qualidade |
 |---|---|---|
-| `v0.4` | **Safe Agent API** | GitHub Actions · pytest · CodeQL · Docker · audit correlation |
+| `v0.5` | **Safe Agent Playground + API** | GitHub Actions · pytest · CodeQL · Docker · Codespaces · Vercel-ready |
 
 `agentic-ai` · `guardrails` · `tool-calling` · `RAG` · `MCP` · `evals` · `observability` · `security`
 
-## Comece em 60 segundos
+## Use agora
 
-### Docker
+### 1 clique: GitHub Codespaces
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/Videirafo/AI-Agent-Production-Checklist?quickstart=1)
+
+O Codespace instala as dependências, inicia a FastAPI e encaminha a porta `8000`. A tela aberta é o **Safe Agent Playground**, que usa a API real do projeto.
+
+### Deploy da sua própria cópia
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FVideirafo%2FAI-Agent-Production-Checklist&root-directory=examples%2Fsafe-agent-api&project-name=safe-agent-api&repository-name=safe-agent-api)
+
+O exemplo possui entrypoint explícito para FastAPI no Vercel e não exige secrets, banco ou provider de IA.
+
+### Docker local
 
 ```bash
 git clone https://github.com/Videirafo/AI-Agent-Production-Checklist.git
@@ -26,9 +38,48 @@ cd AI-Agent-Production-Checklist/examples/safe-agent-api
 docker compose up --build
 ```
 
-Abra `http://localhost:8000/docs` para testar a API via OpenAPI/Swagger.
+Abra:
 
-### VS Code / Python
+- Playground: `http://localhost:8000/`
+- OpenAPI / Swagger: `http://localhost:8000/docs`
+- Health: `http://localhost:8000/health`
+
+## O que você consegue testar
+
+A interface oferece cenários prontos que chamam `POST /v1/run-demo`:
+
+| Cenário | Resultado esperado |
+|---|---|
+| same-tenant `read_record` | permitido e executado |
+| cross-tenant `read_record` | negado por `tenant_mismatch` |
+| `send_notification` sem aprovação | negado e pede aprovação humana |
+| `send_notification` aprovado | permitido, executado e auditado |
+| `delete_record` | bloqueado mesmo com aprovação |
+
+Fluxo demonstrado:
+
+```text
+MODEL SUGGESTION
+→ DETERMINISTIC POLICY
+→ HUMAN APPROVAL
+→ EXECUTION
+→ STRUCTURED AUDIT EVENT
+→ CORRELATION ID
+```
+
+A autorização acontece **fora do modelo**. O LLM pode sugerir uma ação; ele não concede a si mesmo permissão para executá-la.
+
+## Segurança da demo pública
+
+- nenhum LLM, API key ou banco externo;
+- nenhuma ação real de envio ou exclusão;
+- tools são determinísticas e simuladas;
+- tenant IDs e request IDs têm tamanho limitado;
+- a UI usa a mesma API server-side, sem duplicar policy em JavaScript;
+- CSP, `nosniff`, `no-referrer` e `no-store` na página pública;
+- testes cobrem isolamento, approval gate, destructive denial, auditoria e UI pública.
+
+## Rodar no VS Code / Python
 
 ```bash
 git clone https://github.com/Videirafo/AI-Agent-Production-Checklist.git
@@ -41,100 +92,19 @@ pytest
 fastapi dev app/main.py
 ```
 
-No VS Code também estão disponíveis **Run and Debug** e tasks para servidor e testes.
-
-**[Abrir o Safe Agent API →](./examples/safe-agent-api/README.md)**
-
 ## Ajude sem escrever código
 
-Queremos validar a experiência com pessoas que não construíram este repositório. Clone, execute a Safe Agent API e diga onde a configuração ficou confusa.
+Queremos validar a experiência com pessoas que não construíram este repositório.
 
-**[Testar o quickstart e enviar feedback →](https://github.com/Videirafo/AI-Agent-Production-Checklist/issues/17)**
+**[Executar a aplicação e reportar fricção de setup →](https://github.com/Videirafo/AI-Agent-Production-Checklist/issues/17)**
 
-Para quem prefere contribuir com código, há também uma tarefa pequena e isolada para implementar um audit sink JSONL.
+Para quem prefere contribuir com código:
 
 **[Good first issue: JSONL audit sink →](https://github.com/Videirafo/AI-Agent-Production-Checklist/issues/16)**
 
-## O que a demo prova
-
-A API implementa uma camada determinística de policy antes da execução de tools. Não exige LLM nem API key.
-
-| Tool | Política determinística |
-|---|---|
-| `read_record` | permitida somente no mesmo tenant |
-| `send_notification` | exige aprovação humana |
-| `delete_record` | bloqueada no exemplo |
-
-O fluxo `POST /v1/run-demo` também retorna um **audit event estruturado**. O `correlation_id` é derivado do `request_id`, permitindo ligar decisão, execução e diagnóstico operacional sem armazenar conversa privada.
-
-Endpoints:
-
-- `GET /health`
-- `POST /v1/tool-check`
-- `POST /v1/run-demo`
-- documentação OpenAPI em `/docs`
-
-Os testes verificam same-tenant access, cross-tenant denial, approval gate, bloqueio destrutivo e correlação de auditoria para ações permitidas e negadas.
-
-## Modelo de produção
-
-```text
-USE CASE
-→ RISK CLASSIFICATION
-→ DATA & IDENTITY
-→ TOOL POLICY
-→ GUARDRAILS
-→ RAG / MEMORY
-→ EVALS
-→ HUMAN APPROVAL
-→ EXECUTION
-→ AUDIT + CORRELATION
-→ TRACE
-→ INCIDENT RESPONSE
-→ IMPROVE
-```
-
-```mermaid
-flowchart TB
-    U[User / Channel] --> G[Agent Gateway]
-    G --> P[Policy & Guardrails]
-    P --> O[Agent Orchestrator]
-    O --> M[Model]
-    O --> R[RAG / Memory]
-    O --> T[Tool Registry]
-    T --> A[Approval Gate]
-    A --> S[Business Systems]
-    S --> AU[Audit Event + Correlation ID]
-    O --> H[Human Handoff]
-    O --> X[Tracing / Evals / Metrics]
-    AU --> X
-```
-
-## Checklist essencial
-
-### Identidade & tools
-- [ ] tenant/usuário resolvidos antes da execução;
-- [ ] menor privilégio e schemas estritos;
-- [ ] argumentos validados;
-- [ ] tools destrutivas protegidas por policy/approval;
-- [ ] outputs de tools tratados como dados não confiáveis.
-
-### Prompt injection & dados
-- [ ] conteúdo recuperado não sobrescreve system policy;
-- [ ] instruções em páginas/arquivos são input não confiável;
-- [ ] autorização crítica acontece fora do prompt;
-- [ ] saída de modelo é validada antes de SQL/shell/URL/payload executável.
-
-### Evals & operação
-- [ ] dataset de regressão;
-- [ ] task success, tool selection e argumentos avaliados;
-- [ ] testes de segurança/autorização;
-- [ ] tracing, custo, latência e taxa de erro observáveis;
-- [ ] audit event correlacionado por execução crítica;
-- [ ] handoff humano e kill switch disponíveis.
-
 ## Conteúdo técnico
 
+- [Safe Agent API / Playground](./examples/safe-agent-api/README.md)
 - [Checklist completo](./docs/CHECKLIST.md)
 - [Threat model](./docs/THREAT_MODEL.md)
 - [RAG, memória e isolamento](./docs/RAG_MEMORY.md)
@@ -142,21 +112,20 @@ flowchart TB
 - [Production readiness](./templates/PRODUCTION_READINESS_CHECKLIST.md)
 - [Tool policy template](./templates/TOOL_POLICY_TEMPLATE.md)
 - [Threat model template](./templates/THREAT_MODEL_TEMPLATE.md)
-- [Projetos executáveis](./examples/README.md)
 
 ## Contribua
 
 Issues, testes, novas policies e exemplos de guardrails são bem-vindos. Leia [CONTRIBUTING.md](./CONTRIBUTING.md) antes de abrir um PR.
 
-Se este projeto for útil para seu trabalho:
+Se este projeto for útil:
 
-- dê uma **Star** para facilitar que outras pessoas o encontrem;
+- dê uma **Star** para facilitar a descoberta;
 - use **Watch → Releases** para acompanhar versões relevantes;
 - abra uma Issue com um cenário real de agent safety que você gostaria de ver coberto.
 
 ## Segurança e privacidade
 
-Nenhuma credencial, `.env`, IP interno, conversa privada, dado de cliente ou código proprietário deve ser publicado. Consulte [SECURITY.md](./SECURITY.md).
+Nunca publique credenciais, `.env`, private keys, IPs internos, conversa privada, dados de clientes ou código proprietário. Consulte [SECURITY.md](./SECURITY.md).
 
 ## Licença
 
