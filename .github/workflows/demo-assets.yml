@@ -1,0 +1,81 @@
+name: Verified Demo Assets
+
+on:
+  pull_request:
+    paths:
+      - "examples/safe-agent-api/**"
+      - ".github/scripts/capture-demo.mjs"
+      - ".github/workflows/demo-assets.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: examples/safe-agent-api/pyproject.toml
+
+      - name: Install Safe Agent API
+        run: python -m pip install -e "examples/safe-agent-api[dev]"
+
+      - name: Start Safe Agent API
+        run: |
+          cd examples/safe-agent-api
+          fastapi run app/main.py --host 127.0.0.1 --port 8000 > /tmp/safe-agent-api.log 2>&1 &
+          echo $! > /tmp/safe-agent-api.pid
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:8000/health >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/safe-agent-api.log
+          exit 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Capture real Playground interactions
+        run: node .github/scripts/capture-demo.mjs | tee /tmp/demo-capture.log
+
+      - name: Convert recorded interaction to GIF
+        run: |
+          video_path="$(find assets/demo-video -type f -name '*.webm' | head -n 1)"
+          test -n "$video_path"
+          ffmpeg -y -i "$video_path" \
+            -vf "fps=8,scale=960:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=128[p];[s1][p]paletteuse=dither=bayer" \
+            assets/demo/safe-agent-demo.gif
+          test -s assets/demo/safe-agent-playground.png
+          test -s assets/demo/safe-agent-demo.gif
+
+      - name: Upload verified assets
+        uses: actions/upload-artifact@v4
+        with:
+          name: safe-agent-demo-assets
+          path: |
+            assets/demo/safe-agent-playground.png
+            assets/demo/safe-agent-demo.gif
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Show API logs on failure
+        if: failure()
+        run: cat /tmp/safe-agent-api.log || true
