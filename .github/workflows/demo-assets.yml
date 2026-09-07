@@ -5,6 +5,7 @@ on:
     paths:
       - "examples/safe-agent-api/**"
       - ".github/scripts/capture-demo.mjs"
+      - ".github/scripts/build-demo-gif.py"
       - ".github/workflows/demo-assets.yml"
   workflow_dispatch:
 
@@ -28,8 +29,10 @@ jobs:
           cache: pip
           cache-dependency-path: examples/safe-agent-api/pyproject.toml
 
-      - name: Install Safe Agent API
-        run: python -m pip install -e "examples/safe-agent-api[dev]"
+      - name: Install Safe Agent API and image tools
+        run: |
+          python -m pip install -e "examples/safe-agent-api[dev]"
+          python -m pip install Pillow==11.3.0
 
       - name: Start Safe Agent API
         run: |
@@ -55,23 +58,17 @@ jobs:
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
 
-      - name: Capture real Playground interactions
+      - name: Capture real Playground frames
         run: node .github/scripts/capture-demo.mjs | tee /tmp/demo-capture.log
 
-      - name: Convert recorded interaction to optimized GIF
+      - name: Build optimized GIF from verified frames
+        run: python .github/scripts/build-demo-gif.py
+
+      - name: Validate and report asset sizes
         run: |
-          video_path="$(find assets/demo-video -type f -name '*.webm' | head -n 1)"
-          ffmpeg_bin="$(find "$HOME/.cache/ms-playwright" -type f -name 'ffmpeg-linux' | head -n 1)"
-          test -n "$video_path"
-          test -x "$ffmpeg_bin"
-          "$ffmpeg_bin" -y -i "$video_path" \
-            -vf "fps=5,scale=640:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=56[p];[s1][p]paletteuse=dither=bayer:bayer_scale=3" \
-            assets/demo/safe-agent-demo.gif
           test -s assets/demo/safe-agent-playground.png
           test -s assets/demo/safe-agent-demo.gif
-
-      - name: Report asset sizes
-        run: ls -lh assets/demo/safe-agent-playground.png assets/demo/safe-agent-demo.gif
+          ls -lh assets/demo/safe-agent-playground.png assets/demo/safe-agent-demo.gif
 
       - name: Upload verified assets
         uses: actions/upload-artifact@v4
