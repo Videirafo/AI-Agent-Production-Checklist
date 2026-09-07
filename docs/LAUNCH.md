@@ -1,8 +1,10 @@
 # Safe Agent Playground — Launch Kit
 
-Use this only after a canonical public URL has passed the internet smoke test.
+Canonical live demo: **https://safe-agent-playground.onrender.com/**
 
-Replace `{LIVE_URL}` with the verified public Playground URL before posting.
+Source: https://github.com/Videirafo/AI-Agent-Production-Checklist
+
+Use the texts below only after the public internet smoke test for `/`, `/health`, `/docs`, and the five Playground scenarios is confirmed.
 
 ## Show HN
 
@@ -18,7 +20,7 @@ The demo runs without an LLM, API key, signup, database, or external provider. I
 
 Flow: `model suggestion → policy → approval → execution → audit → correlation`.
 
-Live demo: {LIVE_URL}
+Live demo: https://safe-agent-playground.onrender.com/
 Source: https://github.com/Videirafo/AI-Agent-Production-Checklist
 
 I would especially value feedback on whether the authorization boundary is clear and whether any important production guardrail is missing from the demo.
@@ -35,7 +37,7 @@ Most AI-agent examples explain how to call a model or tool. I wanted a runnable 
 
 The Safe Agent Playground is open source and deliberately has no LLM dependency. You can test same-tenant reads, cross-tenant denial, approval-required actions, approved actions, and destructive-tool blocking from the browser.
 
-Live: {LIVE_URL}
+Live: https://safe-agent-playground.onrender.com/
 GitHub: https://github.com/Videirafo/AI-Agent-Production-Checklist
 
 Feedback, edge cases, and small contributions are welcome.
@@ -56,7 +58,7 @@ I am the maintainer of this MIT-licensed project. The demo focuses on a simple r
 
 It lets you test tenant isolation, approval gates, destructive-action denial, audit events, and correlation IDs without any API key or model provider.
 
-Live: {LIVE_URL}
+Live: https://safe-agent-playground.onrender.com/
 GitHub: https://github.com/Videirafo/AI-Agent-Production-Checklist
 
 I am primarily looking for technical criticism: which guardrail or failure mode would you add next?
@@ -78,7 +80,7 @@ It demonstrates:
 
 The central rule is: **the model can suggest an action; it cannot grant itself permission to execute it.**
 
-Live demo: {LIVE_URL}
+Live demo: https://safe-agent-playground.onrender.com/
 Source: https://github.com/Videirafo/AI-Agent-Production-Checklist
 
 I am looking for real feedback, issues, and contributors rather than artificial engagement.
