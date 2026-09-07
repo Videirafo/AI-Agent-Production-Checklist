@@ -58,16 +58,13 @@ jobs:
       - name: Capture real Playground interactions
         run: node .github/scripts/capture-demo.mjs | tee /tmp/demo-capture.log
 
-      - name: Install ffmpeg
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
-
       - name: Convert recorded interaction to optimized GIF
         run: |
           video_path="$(find assets/demo-video -type f -name '*.webm' | head -n 1)"
+          ffmpeg_bin="$(find "$HOME/.cache/ms-playwright" -type f -name 'ffmpeg-linux' | head -n 1)"
           test -n "$video_path"
-          ffmpeg -y -i "$video_path" \
+          test -x "$ffmpeg_bin"
+          "$ffmpeg_bin" -y -i "$video_path" \
             -vf "fps=5,scale=640:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=56[p];[s1][p]paletteuse=dither=bayer:bayer_scale=3" \
             assets/demo/safe-agent-demo.gif
           test -s assets/demo/safe-agent-playground.png
