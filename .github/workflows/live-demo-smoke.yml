@@ -34,14 +34,14 @@ jobs:
 
           base = os.environ["LIVE_URL"]
           scenarios = [
-              ({"actor_tenant_id":"tenant-a","target_tenant_id":"tenant-a","tool":"read_record","human_approved":False,"request_id":"smoke-same-tenant"}, True, "policy_allowed"),
-              ({"actor_tenant_id":"tenant-a","target_tenant_id":"tenant-b","tool":"read_record","human_approved":False,"request_id":"smoke-cross-tenant"}, False, "tenant_mismatch"),
-              ({"actor_tenant_id":"tenant-a","target_tenant_id":"tenant-a","tool":"send_notification","human_approved":False,"request_id":"smoke-approval-required"}, False, "human_approval_required"),
-              ({"actor_tenant_id":"tenant-a","target_tenant_id":"tenant-a","tool":"send_notification","human_approved":True,"request_id":"smoke-approved"}, True, "policy_allowed"),
-              ({"actor_tenant_id":"tenant-a","target_tenant_id":"tenant-a","tool":"delete_record","human_approved":True,"request_id":"smoke-delete-blocked"}, False, "destructive_tool_disabled_in_demo"),
+              ({"actor_tenant_id":"tenant-a","resource_tenant_id":"tenant-a","tool":"read_record","human_approved":False,"request_id":"smoke-same-tenant"}, True, "policy_allowed", True),
+              ({"actor_tenant_id":"tenant-a","resource_tenant_id":"tenant-b","tool":"read_record","human_approved":False,"request_id":"smoke-cross-tenant"}, False, "tenant_mismatch", False),
+              ({"actor_tenant_id":"tenant-a","resource_tenant_id":"tenant-a","tool":"send_notification","human_approved":False,"request_id":"smoke-approval-required"}, False, "human_approval_required", False),
+              ({"actor_tenant_id":"tenant-a","resource_tenant_id":"tenant-a","tool":"send_notification","human_approved":True,"request_id":"smoke-approved"}, True, "policy_allowed", True),
+              ({"actor_tenant_id":"tenant-a","resource_tenant_id":"tenant-a","tool":"delete_record","human_approved":True,"request_id":"smoke-delete-blocked"}, False, "destructive_tool_disabled_in_demo", False),
           ]
 
-          for payload, expected_allowed, expected_reason in scenarios:
+          for payload, expected_allowed, expected_reason, expected_executed in scenarios:
               request = urllib.request.Request(
                   f"{base}/v1/run-demo",
                   data=json.dumps(payload).encode(),
@@ -51,7 +51,9 @@ jobs:
               with urllib.request.urlopen(request, timeout=60) as response:
                   assert response.status == 200
                   body = json.load(response)
-              assert body["allowed"] is expected_allowed, body
-              assert body["reason"] == expected_reason, body
-              assert body["correlation_id"] == payload["request_id"], body
-              print(payload["request_id"], body["allowed"], body["reason"])
+              assert body["decision"]["allowed"] is expected_allowed, body
+              assert body["decision"]["reason"] == expected_reason, body
+              assert body["executed"] is expected_executed, body
+              assert body["audit_event"]["correlation_id"] == payload["request_id"], body
+              assert body["audit_event"]["allowed"] is expected_allowed, body
+              print(payload["request_id"], body["decision"]["allowed"], body["decision"]["reason"])
