@@ -1,6 +1,16 @@
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse, Response
 
+from app.discovery import (
+    AGENTS_MD,
+    HEAD_DISCOVERY_HTML,
+    LLMS_FULL_TXT,
+    LLMS_TXT,
+    PLAYGROUND_MD,
+    ROBOTS_TXT,
+    SITEMAP_MD,
+    SITEMAP_XML,
+)
 from app.models import (
     AuditEvent,
     RunDemoRequest,
@@ -20,14 +30,16 @@ app = FastAPI(
 
 @app.get("/", response_class=HTMLResponse, include_in_schema=False)
 def playground() -> HTMLResponse:
+    html = PLAYGROUND_HTML.replace("</head>", f"{HEAD_DISCOVERY_HTML}</head>")
     return HTMLResponse(
-        PLAYGROUND_HTML,
+        html,
         headers={
             "Cache-Control": "no-store",
             "Content-Security-Policy": (
                 "default-src 'self'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; "
                 "connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'"
             ),
+            "Link": '</llms.txt>; rel="describedby", </playground.md>; rel="alternate"; type="text/markdown"',
             "Referrer-Policy": "no-referrer",
             "X-Content-Type-Options": "nosniff",
         },
@@ -37,6 +49,45 @@ def playground() -> HTMLResponse:
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok", "service": "safe-agent-api", "version": "0.5.0"}
+
+
+@app.get("/llms.txt", response_class=PlainTextResponse, include_in_schema=False)
+def llms_txt() -> PlainTextResponse:
+    return PlainTextResponse(LLMS_TXT, media_type="text/plain")
+
+
+@app.get("/llms-full.txt", response_class=PlainTextResponse, include_in_schema=False)
+def llms_full_txt() -> PlainTextResponse:
+    return PlainTextResponse(LLMS_FULL_TXT, media_type="text/plain")
+
+
+@app.get("/robots.txt", response_class=PlainTextResponse, include_in_schema=False)
+def robots_txt() -> PlainTextResponse:
+    return PlainTextResponse(ROBOTS_TXT, media_type="text/plain")
+
+
+@app.get("/sitemap.xml", include_in_schema=False)
+def sitemap_xml() -> Response:
+    return Response(SITEMAP_XML, media_type="application/xml")
+
+
+@app.get("/sitemap.md", response_class=PlainTextResponse, include_in_schema=False)
+def sitemap_md() -> PlainTextResponse:
+    return PlainTextResponse(SITEMAP_MD, media_type="text/markdown")
+
+
+@app.get("/AGENTS.md", response_class=PlainTextResponse, include_in_schema=False)
+def agents_md() -> PlainTextResponse:
+    return PlainTextResponse(AGENTS_MD, media_type="text/markdown")
+
+
+@app.get("/playground.md", response_class=PlainTextResponse, include_in_schema=False)
+def playground_md() -> PlainTextResponse:
+    return PlainTextResponse(
+        PLAYGROUND_MD,
+        media_type="text/markdown",
+        headers={"Link": '</sitemap.md>; rel="sitemap"'},
+    )
 
 
 @app.post("/v1/tool-check", response_model=ToolDecision)
