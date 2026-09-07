@@ -11,6 +11,8 @@ def test_playground_is_public_and_self_contained() -> None:
     assert "Safe Agent Playground" in response.text
     assert "/v1/run-demo" in response.text
     assert "Why this demo exists" in response.text
+    assert "Why the boundary matters" in response.text
+    assert 'href="/glossary"' in response.text
     assert 'rel="canonical"' in response.text
     assert 'rel="describedby" href="/llms.txt"' in response.text
     assert 'property="og:title"' in response.text
@@ -32,6 +34,7 @@ def test_root_supports_markdown_content_negotiation() -> None:
     assert response.headers["content-type"].startswith("text/markdown")
     assert "# Safe Agent Playground" in response.text
     assert "## Sitemap" in response.text
+    assert "## Glossary" in response.text
     assert 'rel="canonical"' in response.headers["link"]
 
 
@@ -52,6 +55,7 @@ def test_discovery_documents_are_public() -> None:
     assert "# Safe Agent Playground" in llms.text
     assert "/openapi.json" in llms.text
     assert "/index.md" in llms.text
+    assert "/glossary" in llms.text
 
     full = client.get("/llms-full.txt")
     assert full.status_code == 200
@@ -73,6 +77,7 @@ def test_discovery_documents_are_public() -> None:
     sitemap_md = client.get("/sitemap.md")
     assert sitemap_md.status_code == 200
     assert sitemap_md.headers["content-type"].startswith("text/markdown")
+    assert "/glossary" in sitemap_md.text
 
     agents = client.get("/AGENTS.md")
     assert agents.status_code == 200
@@ -88,8 +93,27 @@ def test_discovery_documents_are_public() -> None:
     assert markdown.text.startswith("---\n")
     assert "canonical: https://safe-agent-playground.onrender.com/" in markdown.text
     assert "last_modified: 2026-09-07" in markdown.text
+    assert "last_updated: 2026-09-07" in markdown.text
     assert "## Scenarios" in markdown.text
+    assert "## Glossary" in markdown.text
     assert "## Sitemap" in markdown.text
+
+
+def test_glossary_has_html_and_markdown_versions() -> None:
+    html = client.get("/glossary")
+    assert html.status_code == 200
+    assert html.headers["content-type"].startswith("text/html")
+    assert "Safe Agent Playground Glossary" in html.text
+    assert 'rel="canonical" href="https://safe-agent-playground.onrender.com/glossary"' in html.text
+    assert 'rel="alternate" type="text/markdown" href="/glossary.md"' in html.text
+    assert "Tenant isolation" in html.text
+
+    markdown = client.get("/glossary.md")
+    assert markdown.status_code == 200
+    assert markdown.headers["content-type"].startswith("text/markdown")
+    assert "last_updated: 2026-09-07" in markdown.text
+    assert "## Tool policy" in markdown.text
+    assert 'rel="canonical"' in markdown.headers["link"]
 
 
 def test_read_is_allowed_in_same_tenant() -> None:
