@@ -78,7 +78,7 @@ SITEMAP_MD = f"""# Safe Agent Playground Sitemap
 
 AGENTS_MD = f"""# AGENTS.md
 
-Safe Agent Playground demonstrates production boundaries for AI-agent tool execution. The core invariant is: model suggestion is not authorization. Authorization is enforced by deterministic application policy outside the model.
+Safe Agent Playground demonstrates production boundaries for AI-agent tool execution. Core invariant: Model suggestion is not authorization. Authorization is enforced by deterministic application policy outside the model.
 
 ## Installation
 
