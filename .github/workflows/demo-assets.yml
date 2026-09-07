@@ -56,6 +56,11 @@ jobs:
       - name: Capture real Playground interactions
         run: node .github/scripts/capture-demo.mjs | tee /tmp/demo-capture.log
 
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
       - name: Convert recorded interaction to GIF
         run: |
           video_path="$(find assets/demo-video -type f -name '*.webm' | head -n 1)"
