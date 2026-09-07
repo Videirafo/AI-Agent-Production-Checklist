@@ -45,6 +45,16 @@ No VS Code também estão disponíveis **Run and Debug** e tasks para servidor e
 
 **[Abrir o Safe Agent API →](./examples/safe-agent-api/README.md)**
 
+## Ajude sem escrever código
+
+Queremos validar a experiência com pessoas que não construíram este repositório. Clone, execute a Safe Agent API e diga onde a configuração ficou confusa.
+
+**[Testar o quickstart e enviar feedback →](https://github.com/Videirafo/AI-Agent-Production-Checklist/issues/17)**
+
+Para quem prefere contribuir com código, há também uma tarefa pequena e isolada para implementar um audit sink JSONL.
+
+**[Good first issue: JSONL audit sink →](https://github.com/Videirafo/AI-Agent-Production-Checklist/issues/16)**
+
 ## O que a demo prova
 
 A API implementa uma camada determinística de policy antes da execução de tools. Não exige LLM nem API key.
