@@ -2,33 +2,52 @@
 
 # AI Agent Production Checklist
 
+<p align="center">
+  <a href="https://github.com/Videirafo/AI-Agent-Production-Checklist/actions"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/Videirafo/AI-Agent-Production-Checklist/example-safe-agent.yml?branch=main&label=tests"></a>
+  <a href="./LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
+  <img alt="GitHub stars" src="https://img.shields.io/github/stars/Videirafo/AI-Agent-Production-Checklist?style=social">
+</p>
+
 **Checklist + API executável para projetar, avaliar, proteger e operar agentes de IA em produção.**
 
 | Status | Projeto executável | Qualidade |
 |---|---|---|
-| `v0.2` | **Safe Agent API** | GitHub Actions · pytest · docs quality · secret scan |
+| `v0.3` | **Safe Agent API** | GitHub Actions · pytest · CodeQL · Docker · secret scan |
 
 `agentic-ai` · `guardrails` · `tool-calling` · `RAG` · `MCP` · `evals` · `observability` · `security`
 
-## Clone & Run no VS Code
+## Comece em 60 segundos
 
-O `Safe Agent API` demonstra políticas de tools **sem precisar de LLM ou API key**:
+### Docker
 
 ```bash
 git clone https://github.com/Videirafo/AI-Agent-Production-Checklist.git
 cd AI-Agent-Production-Checklist/examples/safe-agent-api
-code .
+docker compose up --build
 ```
 
-Crie o ambiente virtual, instale `.[dev]` e use o próprio VS Code:
+Abra `http://localhost:8000/docs` para testar a API via OpenAPI/Swagger.
 
-- **Run and Debug → `Agent API: debug FastAPI`**;
-- **Tasks → `Agent API: dev server`**;
-- **Tasks → `Agent API: pytest`**.
+### VS Code / Python
+
+```bash
+git clone https://github.com/Videirafo/AI-Agent-Production-Checklist.git
+cd AI-Agent-Production-Checklist/examples/safe-agent-api
+python -m venv .venv
+# Linux/macOS: source .venv/bin/activate
+# Windows PowerShell: .venv\Scripts\Activate.ps1
+pip install -e ".[dev]"
+pytest
+fastapi dev app/main.py
+```
+
+No VS Code também estão disponíveis **Run and Debug** e tasks para servidor e testes.
 
 **[Abrir o Safe Agent API →](./examples/safe-agent-api/README.md)**
 
-### Políticas demonstradas
+## O que a demo prova
+
+A API implementa uma camada determinística de policy antes da execução de tools. Não exige LLM nem API key.
 
 | Tool | Política determinística |
 |---|---|
@@ -79,23 +98,19 @@ flowchart TB
 ## Checklist essencial
 
 ### Identidade & tools
-
 - [ ] tenant/usuário resolvidos antes da execução;
-- [ ] menor privilégio;
-- [ ] schemas estritos;
+- [ ] menor privilégio e schemas estritos;
 - [ ] argumentos validados;
 - [ ] tools destrutivas protegidas por policy/approval;
 - [ ] outputs de tools tratados como dados não confiáveis.
 
 ### Prompt injection & dados
-
 - [ ] conteúdo recuperado não sobrescreve system policy;
 - [ ] instruções em páginas/arquivos são input não confiável;
 - [ ] autorização crítica acontece fora do prompt;
 - [ ] saída de modelo é validada antes de SQL/shell/URL/payload executável.
 
 ### Evals & operação
-
 - [ ] dataset de regressão;
 - [ ] task success, tool selection e argumentos avaliados;
 - [ ] testes de segurança/autorização;
@@ -113,21 +128,23 @@ flowchart TB
 - [Threat model template](./templates/THREAT_MODEL_TEMPLATE.md)
 - [Projetos executáveis](./examples/README.md)
 
-## Git workflow
+## Contribua
 
-```bash
-git checkout -b feat/minha-policy
-# altere e rode pytest no VS Code
-git add .
-git commit -m "feat: add agent tool policy"
-git push -u origin feat/minha-policy
-```
+Issues, testes, novas policies e exemplos de guardrails são bem-vindos. Leia [CONTRIBUTING.md](./CONTRIBUTING.md) antes de abrir um PR.
 
-Consulte [CONTRIBUTING.md](./CONTRIBUTING.md).
+Se este projeto for útil para seu trabalho:
+
+- dê uma **Star** para facilitar que outras pessoas o encontrem;
+- use **Watch → Releases** para acompanhar versões relevantes;
+- abra uma Issue com um cenário real de agent safety que você gostaria de ver coberto.
 
 ## Segurança e privacidade
 
 Nenhuma credencial, `.env`, IP interno, conversa privada, dado de cliente ou código proprietário deve ser publicado. Consulte [SECURITY.md](./SECURITY.md).
+
+## Licença
+
+Distribuído sob a [MIT License](./LICENSE).
 
 ---
 
