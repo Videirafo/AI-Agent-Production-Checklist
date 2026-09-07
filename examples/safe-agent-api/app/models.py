@@ -6,8 +6,8 @@ ToolName = Literal["read_record", "send_notification", "delete_record"]
 
 
 class ToolCheckRequest(BaseModel):
-    actor_tenant_id: str = Field(min_length=1)
-    resource_tenant_id: str = Field(min_length=1)
+    actor_tenant_id: str = Field(min_length=1, max_length=64)
+    resource_tenant_id: str = Field(min_length=1, max_length=64)
     tool: ToolName
     human_approved: bool = False
 
@@ -19,7 +19,7 @@ class ToolDecision(BaseModel):
 
 
 class RunDemoRequest(ToolCheckRequest):
-    request_id: str = Field(min_length=1)
+    request_id: str = Field(min_length=1, max_length=128)
 
 
 class AuditEvent(BaseModel):
