@@ -1,0 +1,57 @@
+name: Live Demo Smoke
+
+on:
+  pull_request:
+    paths:
+      - "README.md"
+      - "docs/LAUNCH.md"
+      - ".github/workflows/live-demo-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      LIVE_URL: https://safe-agent-playground.onrender.com
+    steps:
+      - name: Public endpoints
+        run: |
+          curl --fail --retry 5 --retry-delay 5 --max-time 60 "$LIVE_URL/" | grep -q "Safe Agent Playground"
+          curl --fail --retry 5 --retry-delay 5 --max-time 60 "$LIVE_URL/health" | grep -q '"status":"ok"'
+          curl --fail --retry 5 --retry-delay 5 --max-time 60 "$LIVE_URL/docs" | grep -q "Swagger UI"
+          curl --fail --retry 5 --retry-delay 5 --max-time 60 "$LIVE_URL/openapi.json" | grep -q '"/v1/run-demo"'
+
+      - name: Five public Playground scenarios
+        shell: python
+        run: |
+          import json
+          import os
+          import urllib.request
+
+          base = os.environ["LIVE_URL"]
+          scenarios = [
+              ({"actor_tenant_id":"tenant-a","target_tenant_id":"tenant-a","tool":"read_record","human_approved":False,"request_id":"smoke-same-tenant"}, True, "policy_allowed"),
+              ({"actor_tenant_id":"tenant-a","target_tenant_id":"tenant-b","tool":"read_record","human_approved":False,"request_id":"smoke-cross-tenant"}, False, "tenant_mismatch"),
+              ({"actor_tenant_id":"tenant-a","target_tenant_id":"tenant-a","tool":"send_notification","human_approved":False,"request_id":"smoke-approval-required"}, False, "human_approval_required"),
+              ({"actor_tenant_id":"tenant-a","target_tenant_id":"tenant-a","tool":"send_notification","human_approved":True,"request_id":"smoke-approved"}, True, "policy_allowed"),
+              ({"actor_tenant_id":"tenant-a","target_tenant_id":"tenant-a","tool":"delete_record","human_approved":True,"request_id":"smoke-delete-blocked"}, False, "destructive_tool_disabled_in_demo"),
+          ]
+
+          for payload, expected_allowed, expected_reason in scenarios:
+              request = urllib.request.Request(
+                  f"{base}/v1/run-demo",
+                  data=json.dumps(payload).encode(),
+                  headers={"Content-Type":"application/json"},
+                  method="POST",
+              )
+              with urllib.request.urlopen(request, timeout=60) as response:
+                  assert response.status == 200
+                  body = json.load(response)
+              assert body["allowed"] is expected_allowed, body
+              assert body["reason"] == expected_reason, body
+              assert body["correlation_id"] == payload["request_id"], body
+              print(payload["request_id"], body["allowed"], body["reason"])
