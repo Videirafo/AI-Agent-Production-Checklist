@@ -22,8 +22,21 @@ class RunDemoRequest(ToolCheckRequest):
     request_id: str = Field(min_length=1)
 
 
+class AuditEvent(BaseModel):
+    event_type: Literal["tool_execution_decision"] = "tool_execution_decision"
+    correlation_id: str
+    actor_tenant_id: str
+    resource_tenant_id: str
+    tool: ToolName
+    allowed: bool
+    executed: bool
+    reason: str
+    human_approved: bool
+
+
 class RunDemoResponse(BaseModel):
     request_id: str
     decision: ToolDecision
     executed: bool
     result: str | None = None
+    audit_event: AuditEvent
