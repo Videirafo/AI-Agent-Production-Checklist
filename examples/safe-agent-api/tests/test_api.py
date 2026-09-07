@@ -58,7 +58,7 @@ def test_notification_requires_human_approval() -> None:
     assert body["requires_human_approval"] is True
 
 
-def test_destructive_tool_is_disabled() -> None:
+def test_destructive_tool_denial_is_correlated_in_audit_event() -> None:
     response = client.post(
         "/v1/run-demo",
         json={
@@ -72,3 +72,33 @@ def test_destructive_tool_is_disabled() -> None:
     body = response.json()
     assert body["executed"] is False
     assert body["decision"]["reason"] == "destructive_tool_disabled_in_demo"
+    assert body["audit_event"]["correlation_id"] == "req-demo-001"
+    assert body["audit_event"]["allowed"] is False
+    assert body["audit_event"]["executed"] is False
+
+
+def test_approved_notification_execution_is_audited() -> None:
+    response = client.post(
+        "/v1/run-demo",
+        json={
+            "request_id": "req-demo-002",
+            "actor_tenant_id": "alpha",
+            "resource_tenant_id": "alpha",
+            "tool": "send_notification",
+            "human_approved": True,
+        },
+    )
+    body = response.json()
+    assert body["executed"] is True
+    assert body["result"] == "demo_notification_sent"
+    assert body["audit_event"] == {
+        "event_type": "tool_execution_decision",
+        "correlation_id": "req-demo-002",
+        "actor_tenant_id": "alpha",
+        "resource_tenant_id": "alpha",
+        "tool": "send_notification",
+        "allowed": True,
+        "executed": True,
+        "reason": "policy_allowed",
+        "human_approved": True,
+    }

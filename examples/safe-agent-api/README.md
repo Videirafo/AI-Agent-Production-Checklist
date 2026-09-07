@@ -1,6 +1,6 @@
 # Safe Agent API
 
-Projeto executável do **AI Agent Production Checklist**. Ele demonstra uma camada determinística de autorização para tools de agentes sem depender de LLM ou API key.
+Projeto executável do **AI Agent Production Checklist**. Demonstra uma camada determinística de autorização, aprovação e auditoria para tools de agentes sem depender de LLM ou API key.
 
 ## O que demonstra
 
@@ -8,9 +8,25 @@ Projeto executável do **AI Agent Production Checklist**. Ele demonstra uma cama
 - least privilege;
 - approval gate humano;
 - bloqueio de tool destrutiva;
+- audit event estruturado;
+- `request_id` propagado como `correlation_id`;
 - contratos Pydantic;
 - API FastAPI com OpenAPI automática;
-- testes de segurança com pytest.
+- testes de segurança com pytest;
+- execução via Docker.
+
+## Rodar com Docker
+
+```bash
+git clone https://github.com/Videirafo/AI-Agent-Production-Checklist.git
+cd AI-Agent-Production-Checklist/examples/safe-agent-api
+docker compose up --build
+```
+
+Abra:
+
+- API docs: `http://127.0.0.1:8000/docs`
+- health: `http://127.0.0.1:8000/health`
 
 ## Clonar e abrir no VS Code
 
@@ -20,15 +36,13 @@ cd AI-Agent-Production-Checklist/examples/safe-agent-api
 code .
 ```
 
-Crie o ambiente e instale:
-
 ### Windows PowerShell
 
 ```powershell
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -e ".[dev]"
-fastapi dev
+fastapi dev app/main.py
 ```
 
 ### Linux/macOS
@@ -37,13 +51,8 @@ fastapi dev
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e ".[dev]"
-fastapi dev
+fastapi dev app/main.py
 ```
-
-Abra:
-
-- API docs: `http://127.0.0.1:8000/docs`
-- health: `http://127.0.0.1:8000/health`
 
 ## Executar testes
 
@@ -51,7 +60,7 @@ Abra:
 pytest
 ```
 
-## Exemplo de política
+## Políticas
 
 | Tool | Regra |
 |---|---|
@@ -61,20 +70,23 @@ pytest
 
 A autorização é executada **fora do prompt/modelo**. Um LLM pode sugerir uma ação, mas não concede a si mesmo permissão para executá-la.
 
-## Teste manual
+## Audit + correlation
 
-POST `/v1/tool-check`:
+`POST /v1/run-demo` recebe um `request_id`. A resposta inclui um `audit_event` cujo `correlation_id` usa o mesmo identificador. Assim uma decisão permitida ou negada pode ser ligada à execução e ao diagnóstico operacional.
+
+Exemplo:
 
 ```json
 {
+  "request_id": "req-demo-002",
   "actor_tenant_id": "alpha",
   "resource_tenant_id": "alpha",
   "tool": "send_notification",
-  "human_approved": false
+  "human_approved": true
 }
 ```
 
-O resultado deve indicar `human_approval_required`.
+A resposta registra `allowed`, `executed`, `reason`, tenants, tool e `human_approved`, sem armazenar prompt ou conteúdo de conversa.
 
 ## Fazer sua branch
 

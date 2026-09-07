@@ -12,7 +12,7 @@
 
 | Status | Projeto executável | Qualidade |
 |---|---|---|
-| `v0.3` | **Safe Agent API** | GitHub Actions · pytest · CodeQL · Docker · secret scan |
+| `v0.4` | **Safe Agent API** | GitHub Actions · pytest · CodeQL · Docker · audit correlation |
 
 `agentic-ai` · `guardrails` · `tool-calling` · `RAG` · `MCP` · `evals` · `observability` · `security`
 
@@ -55,6 +55,8 @@ A API implementa uma camada determinística de policy antes da execução de too
 | `send_notification` | exige aprovação humana |
 | `delete_record` | bloqueada no exemplo |
 
+O fluxo `POST /v1/run-demo` também retorna um **audit event estruturado**. O `correlation_id` é derivado do `request_id`, permitindo ligar decisão, execução e diagnóstico operacional sem armazenar conversa privada.
+
 Endpoints:
 
 - `GET /health`
@@ -62,7 +64,7 @@ Endpoints:
 - `POST /v1/run-demo`
 - documentação OpenAPI em `/docs`
 
-Os testes verificam same-tenant access, cross-tenant denial, approval gate e bloqueio de ação destrutiva.
+Os testes verificam same-tenant access, cross-tenant denial, approval gate, bloqueio destrutivo e correlação de auditoria para ações permitidas e negadas.
 
 ## Modelo de produção
 
@@ -75,7 +77,8 @@ USE CASE
 → RAG / MEMORY
 → EVALS
 → HUMAN APPROVAL
-→ DEPLOY
+→ EXECUTION
+→ AUDIT + CORRELATION
 → TRACE
 → INCIDENT RESPONSE
 → IMPROVE
@@ -91,8 +94,10 @@ flowchart TB
     O --> T[Tool Registry]
     T --> A[Approval Gate]
     A --> S[Business Systems]
+    S --> AU[Audit Event + Correlation ID]
     O --> H[Human Handoff]
     O --> X[Tracing / Evals / Metrics]
+    AU --> X
 ```
 
 ## Checklist essencial
@@ -115,6 +120,7 @@ flowchart TB
 - [ ] task success, tool selection e argumentos avaliados;
 - [ ] testes de segurança/autorização;
 - [ ] tracing, custo, latência e taxa de erro observáveis;
+- [ ] audit event correlacionado por execução crítica;
 - [ ] handoff humano e kill switch disponíveis.
 
 ## Conteúdo técnico
