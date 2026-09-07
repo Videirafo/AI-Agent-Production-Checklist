@@ -9,15 +9,17 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   capture:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Checkout
+      - name: Checkout source branch
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -83,6 +85,22 @@ jobs:
             assets/demo/safe-agent-demo.gif
           if-no-files-found: error
           retention-days: 14
+
+      - name: Commit verified assets to source branch
+        if: >-
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository &&
+          github.actor != 'github-actions[bot]'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/demo/safe-agent-playground.png assets/demo/safe-agent-demo.gif
+          if git diff --cached --quiet; then
+            echo "Verified assets are unchanged."
+            exit 0
+          fi
+          git commit -m "docs: refresh verified demo assets"
+          git push origin "HEAD:${GITHUB_HEAD_REF}"
 
       - name: Show API logs on failure
         if: failure()
