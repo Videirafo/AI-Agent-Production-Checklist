@@ -4,6 +4,8 @@ from fastapi.responses import HTMLResponse, PlainTextResponse, Response
 from app.discovery import (
     AGENTS_MD,
     DISCOVERY_BODY_HTML,
+    GLOSSARY_HTML,
+    GLOSSARY_MD,
     HEAD_DISCOVERY_HTML,
     LLMS_FULL_TXT,
     LLMS_TXT,
@@ -60,6 +62,33 @@ def playground(request: Request) -> Response:
             "Link": '</llms.txt>; rel="describedby", </index.md>; rel="alternate"; type="text/markdown"',
             "Referrer-Policy": "no-referrer",
             "X-Content-Type-Options": "nosniff",
+            "X-Robots-Tag": "index, follow, max-snippet:-1, max-image-preview:large",
+        },
+    )
+
+
+@app.get("/glossary", response_class=HTMLResponse, include_in_schema=False)
+def glossary() -> HTMLResponse:
+    return HTMLResponse(
+        GLOSSARY_HTML,
+        headers={
+            "Cache-Control": "public, max-age=300",
+            "Content-Security-Policy": "default-src 'self'; style-src 'unsafe-inline'; frame-ancestors 'none'",
+            "Link": '</llms.txt>; rel="describedby", </glossary.md>; rel="alternate"; type="text/markdown"',
+            "Referrer-Policy": "no-referrer",
+            "X-Content-Type-Options": "nosniff",
+            "X-Robots-Tag": "index, follow, max-snippet:-1, max-image-preview:large",
+        },
+    )
+
+
+@app.get("/glossary.md", response_class=PlainTextResponse, include_in_schema=False)
+def glossary_md() -> PlainTextResponse:
+    return PlainTextResponse(
+        GLOSSARY_MD,
+        media_type="text/markdown",
+        headers={
+            "Link": '</glossary>; rel="canonical", </sitemap.md>; rel="sitemap"',
             "X-Robots-Tag": "index, follow, max-snippet:-1, max-image-preview:large",
         },
     )
