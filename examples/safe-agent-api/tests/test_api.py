@@ -10,6 +10,9 @@ def test_playground_is_public_and_self_contained() -> None:
     assert response.status_code == 200
     assert "Safe Agent Playground" in response.text
     assert "/v1/run-demo" in response.text
+    assert 'rel="canonical"' in response.text
+    assert 'rel="describedby" href="/llms.txt"' in response.text
+    assert 'type="application/ld+json"' in response.text
     assert response.headers["x-content-type-options"] == "nosniff"
     assert "connect-src 'self'" in response.headers["content-security-policy"]
 
@@ -22,6 +25,41 @@ def test_health() -> None:
         "service": "safe-agent-api",
         "version": "0.5.0",
     }
+
+
+def test_discovery_documents_are_public() -> None:
+    llms = client.get("/llms.txt")
+    assert llms.status_code == 200
+    assert llms.headers["content-type"].startswith("text/plain")
+    assert "# Safe Agent Playground" in llms.text
+    assert "/openapi.json" in llms.text
+
+    full = client.get("/llms-full.txt")
+    assert full.status_code == 200
+    assert "## Demo scenarios" in full.text
+
+    robots = client.get("/robots.txt")
+    assert robots.status_code == 200
+    assert "User-agent: *" in robots.text
+    assert "Sitemap:" in robots.text
+
+    sitemap_xml = client.get("/sitemap.xml")
+    assert sitemap_xml.status_code == 200
+    assert sitemap_xml.headers["content-type"].startswith("application/xml")
+    assert "<urlset" in sitemap_xml.text
+
+    sitemap_md = client.get("/sitemap.md")
+    assert sitemap_md.status_code == 200
+    assert sitemap_md.headers["content-type"].startswith("text/markdown")
+
+    agents = client.get("/AGENTS.md")
+    assert agents.status_code == 200
+    assert "Model suggestion is not authorization" in agents.text
+
+    markdown = client.get("/playground.md")
+    assert markdown.status_code == 200
+    assert markdown.headers["content-type"].startswith("text/markdown")
+    assert "## Scenarios" in markdown.text
 
 
 def test_read_is_allowed_in_same_tenant() -> None:
