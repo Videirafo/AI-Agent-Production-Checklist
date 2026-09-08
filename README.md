@@ -11,6 +11,21 @@
 
 **Checklist + aplicação executável para projetar, avaliar, proteger e operar agentes de IA em produção.**
 
+## O problema em linguagem simples
+
+Um agente de IA pode sugerir ações como **ler um registro**, **enviar uma notificação** ou **chamar uma ferramenta**. O desenho perigoso é deixar o próprio modelo decidir se tem permissão para executar o que sugeriu.
+
+A regra demonstrada aqui é simples:
+
+> **Model suggestion is not authorization.** O modelo propõe a ação; a aplicação verifica tenant, policy e aprovação humana antes de executar ou negar.
+
+| Fluxo | Exemplo |
+|---|---|
+| ❌ Inseguro | `AI diz “envie” → ferramenta executa porque o modelo pediu` |
+| ✅ Mais seguro | `AI diz “envie” → aplicação verifica escopo + policy + approval → executa ou nega` |
+
+O Playground existe para tornar essa separação **visível, testável e auditável**, sem depender de um LLM real.
+
 ## 🚀 Live Demo
 
 **[Open the Safe Agent Playground →](https://safe-agent-playground.onrender.com/)**

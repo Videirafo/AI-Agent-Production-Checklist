@@ -6,36 +6,54 @@ Source: https://github.com/Videirafo/AI-Agent-Production-Checklist
 
 Use the texts below only after the public internet smoke test for `/`, `/health`, `/docs`, and the five Playground scenarios is confirmed.
 
+## Positioning rule
+
+Lead with the concrete problem before architecture terminology:
+
+> AI agents can propose tool actions, but the application — not the model — must decide whether those actions are allowed to execute.
+
+Core invariant: **model suggestion is not authorization**.
+
+Avoid opening with phrases like "authorization boundaries" without first explaining the practical risk.
+
 ## Show HN
 
 **Title**
 
-`Show HN: A runnable playground for safer AI agent tool execution`
+`Show HN: Safe Agent Playground — AI proposes tool actions, app policy authorizes them`
 
 **Body**
 
-I built a small open-source FastAPI playground to make one production boundary explicit: a model may suggest a tool action, but it should not authorize itself to execute it.
+I built a small open-source FastAPI playground around one practical agent-safety rule: an AI can suggest a tool action, but it should not decide its own permissions.
 
-The demo runs without an LLM, API key, signup, database, or external provider. It includes tenant isolation, deterministic tool policies, a human-approval gate, destructive-action denial, structured audit events, and correlation IDs.
+Unsafe path: `AI says “send it” → tool executes because the model requested it`.
 
-Flow: `model suggestion → policy → approval → execution → audit → correlation`.
+Safer path: `AI says “send it” → application checks tenant scope + deterministic policy + approval → executes or denies`.
+
+The demo requires no LLM provider, API key, signup, database, or external provider. It includes tenant isolation, human approval for selected actions, destructive-action denial, structured audit events, and correlation IDs.
 
 Live demo: https://safe-agent-playground.onrender.com/
 Source: https://github.com/Videirafo/AI-Agent-Production-Checklist
 
-I would especially value feedback on whether the authorization boundary is clear and whether any important production guardrail is missing from the demo.
+I would especially value feedback on whether the premise is immediately clear and which production failure mode you would add next.
 
 ## DEV #showdev
 
 **Title**
 
-`I built a Safe Agent Playground to keep tool authorization outside the model`
+`I built a Safe Agent Playground where the AI proposes actions but the app controls permission`
 
 **Post**
 
-Most AI-agent examples explain how to call a model or tool. I wanted a runnable example of what happens immediately after that: policy enforcement, human approval, execution boundaries, auditability, and tenant isolation.
+AI agents often need to call tools: read records, send notifications, update systems, or trigger workflows. The risky design is allowing the model that suggested the action to also decide whether it is allowed.
 
-The Safe Agent Playground is open source and deliberately has no LLM dependency. You can test same-tenant reads, cross-tenant denial, approval-required actions, approved actions, and destructive-tool blocking from the browser.
+Safe Agent Playground makes the split visible:
+
+`AI proposes → app policy checks scope → human approval when required → execute or deny → audit records why`
+
+You can test same-tenant reads, cross-tenant denial, approval-required actions, approved actions, and destructive-tool blocking directly in the browser.
+
+No LLM provider, API key, signup, or external database is required.
 
 Live: https://safe-agent-playground.onrender.com/
 GitHub: https://github.com/Videirafo/AI-Agent-Production-Checklist
@@ -50,26 +68,34 @@ Prefer a venue that explicitly allows self-promotion or free/open-source project
 
 **Title**
 
-`I built a runnable open-source demo for AI-agent authorization boundaries — looking for technical feedback`
+`I built a demo where AI agents can propose tool actions but cannot authorize themselves — looking for technical feedback`
 
 **Body**
 
-I am the maintainer of this MIT-licensed project. The demo focuses on a simple rule: model suggestion is not authorization.
+I am the maintainer of this MIT-licensed project. It demonstrates one rule in a concrete way: an AI can propose a tool action, but deterministic application policy decides whether that action may execute.
 
-It lets you test tenant isolation, approval gates, destructive-action denial, audit events, and correlation IDs without any API key or model provider.
+Unsafe: `model requests action → tool executes because the model asked`.
+
+Safer: `model requests action → application checks tenant + policy + approval → execute or deny`.
+
+The public demo lets you test tenant isolation, approval gates, destructive-action denial, audit events, and correlation IDs without any API key or model provider.
 
 Live: https://safe-agent-playground.onrender.com/
 GitHub: https://github.com/Videirafo/AI-Agent-Production-Checklist
 
-I am primarily looking for technical criticism: which guardrail or failure mode would you add next?
+I am primarily looking for technical criticism: is the premise clear now, and which guardrail or failure mode would you add next?
 
 ## LinkedIn
 
-I am moving my GitHub portfolio from static repositories toward software other developers can actually execute, test, and improve.
+AI agents can call tools, but the model that proposes an action should not also decide whether it is allowed to execute it.
 
-The latest step is the Safe Agent Playground: an open-source FastAPI demo for agent-tool authorization boundaries.
+That is the problem I wanted to make visible with the Safe Agent Playground, an open-source FastAPI demo.
 
-It demonstrates:
+The flow is intentionally explicit:
+
+`AI proposes → application policy checks scope → human approval when required → execute or deny → audit records why`
+
+The demo includes:
 - tenant isolation;
 - deterministic tool policies;
 - human approval;
