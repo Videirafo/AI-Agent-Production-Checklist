@@ -14,6 +14,14 @@ PLAYGROUND_HTML = r'''<!doctype html>
     .eyebrow { text-transform:uppercase; letter-spacing:.14em; color:var(--accent); font-weight:700; font-size:12px; }
     h1 { font-size:clamp(34px,6vw,64px); line-height:1; margin:10px 0 16px; letter-spacing:-.04em; }
     .lead { color:var(--muted); max-width:760px; font-size:17px; }
+    .premise { margin-top:18px; border:1px solid #315b91; background:rgba(10,28,49,.9); border-radius:14px; padding:16px; }
+    .premise strong { display:block; margin-bottom:7px; font-size:15px; }
+    .premise p { margin:0; color:#d7e3f2; }
+    .example { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
+    .example > div { border:1px solid var(--line); border-radius:10px; padding:11px 12px; background:#091523; }
+    .example small { display:block; color:var(--muted); margin-bottom:4px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; }
+    .unsafe { color:var(--bad); }
+    .safe { color:var(--good); }
     .flow { border:1px solid var(--line); background:rgba(13,27,45,.82); border-radius:18px; padding:18px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; color:#c9d8ea; }
     .grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
     .card { border:1px solid var(--line); background:rgba(13,27,45,.9); border-radius:18px; padding:20px; box-shadow:0 18px 60px rgba(0,0,0,.18); }
@@ -38,7 +46,7 @@ PLAYGROUND_HTML = r'''<!doctype html>
     .reason-good { color:var(--good); }
     .reason-bad { color:var(--bad); }
     .footer { color:var(--muted); margin-top:22px; font-size:13px; }
-    @media (max-width:820px) { .hero,.grid { grid-template-columns:1fr; } .result-summary { grid-template-columns:1fr; } }
+    @media (max-width:820px) { .hero,.grid,.example { grid-template-columns:1fr; } .result-summary { grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
@@ -47,9 +55,18 @@ PLAYGROUND_HTML = r'''<!doctype html>
       <div>
         <div class="eyebrow">Open-source production safety demo</div>
         <h1>Safe Agent Playground</h1>
-        <p class="lead">Run deterministic tool-policy decisions in the browser. No LLM, API key, signup, database, or external provider is required. Authorization stays outside the model.</p>
+        <p class="lead"><strong>What problem does this solve?</strong> AI agents can suggest actions such as reading customer data or sending a notification. The dangerous design is letting the AI decide its own permissions. This demo shows the safer split: the AI proposes; the application decides whether the action is allowed.</p>
+
+        <div class="premise" aria-label="Unsafe versus safe agent authorization example">
+          <strong>The premise in one sentence</strong>
+          <p><b>Model suggestion is not authorization.</b> A tool call must pass deterministic application policy before anything executes.</p>
+          <div class="example">
+            <div><small>Unsafe</small><span class="unsafe">AI says “send it” → tool executes because the model requested it.</span></div>
+            <div><small>Safer</small><span class="safe">AI says “send it” → app checks tenant + policy + approval → executes or denies.</span></div>
+          </div>
+        </div>
       </div>
-      <div class="flow">model suggestion<br>↓<br><b>policy</b><br>↓<br><b>human approval</b><br>↓<br><b>execution</b><br>↓<br><b>audit + correlation</b></div>
+      <div class="flow">AI proposes action<br>↓<br><b>app policy checks scope</b><br>↓<br><b>human approval when required</b><br>↓<br><b>execute or deny</b><br>↓<br><b>audit records why</b></div>
     </section>
 
     <section class="grid">
