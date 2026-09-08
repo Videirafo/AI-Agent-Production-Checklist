@@ -10,6 +10,12 @@ def test_playground_is_public_and_self_contained() -> None:
     assert response.status_code == 200
     assert "Safe Agent Playground" in response.text
     assert "/v1/run-demo" in response.text
+    assert "What problem does this solve?" in response.text
+    assert "The premise in one sentence" in response.text
+    assert "Model suggestion is not authorization." in response.text
+    assert "Unsafe" in response.text
+    assert "Safer" in response.text
+    assert "AI proposes action" in response.text
     assert "Why this demo exists" in response.text
     assert "Why the boundary matters" in response.text
     assert 'href="/glossary"' in response.text
