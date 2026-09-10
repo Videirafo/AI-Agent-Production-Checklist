@@ -94,6 +94,30 @@ O adapter `JsonlAuditSink` persiste somente o modelo `AuditEvent` já validado, 
 
 Esse file sink existe para **demos locais e testes**. Não deve ser tratado como event store de produção: produção precisa definir retenção, concorrência, durabilidade, acesso, rotação, integridade e observabilidade adequadas ao ambiente.
 
+## Verification-first Task Contract
+
+O exemplo também mantém um contrato explícito de tarefa em `app/task_contract.py` e golden cases versionados em `evals/golden_cases.json`.
+
+```text
+Task Contract
+→ policy determinística
+→ terminal state
+→ golden expectation
+→ PASS ou failed criteria
+```
+
+O contrato registra objetivo, critérios de sucesso/parada e budgets de turns, tool calls e tempo. O evaluator retorna um dos estados `PASS`, `FAIL`, `RETRYABLE`, `BLOCKED` ou `NEEDS_HUMAN` e aponta cada critério divergente em vez de aceitar uma resposta por aparência.
+
+A suíte inicial prova cinco caminhos: leitura same-tenant, bloqueio cross-tenant, aprovação humana necessária, notificação aprovada e delete destrutivo bloqueado. Ela continua sem depender de LLM ou provider externo.
+
+Para validar:
+
+```bash
+pytest tests/test_golden_evaluator.py -q
+```
+
+Mudanças futuras de policy, modelo, prompt ou runtime devem preservar esses casos ou alterar as expectativas explicitamente em uma PR revisável.
+
 ## VS Code / Python
 
 ```bash
