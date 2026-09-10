@@ -82,6 +82,18 @@ A autorização é executada **fora do prompt/modelo**. Um LLM pode sugerir uma 
 
 A resposta registra `allowed`, `executed`, `reason`, tenants, tool e `human_approved`, sem armazenar prompt ou conteúdo de conversa.
 
+### Persistência JSONL opcional
+
+Por padrão a demo pública continua stateless. Para uma execução local, defina `SAFE_AGENT_AUDIT_JSONL_PATH` e cada decisão validada será acrescentada como um evento JSON por linha:
+
+```bash
+SAFE_AGENT_AUDIT_JSONL_PATH=./var/audit.jsonl fastapi dev app/main.py
+```
+
+O adapter `JsonlAuditSink` persiste somente o modelo `AuditEvent` já validado, depois que a policy determinística produziu a decisão. Ele não recebe prompts, conteúdo de conversa, segredos nem payload arbitrário da tool.
+
+Esse file sink existe para **demos locais e testes**. Não deve ser tratado como event store de produção: produção precisa definir retenção, concorrência, durabilidade, acesso, rotação, integridade e observabilidade adequadas ao ambiente.
+
 ## VS Code / Python
 
 ```bash
