@@ -1,6 +1,7 @@
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.responses import HTMLResponse, PlainTextResponse, Response
 
+from app.audit import AuditSink, get_audit_sink
 from app.discovery import (
     AGENTS_MD,
     DISCOVERY_BODY_HTML,
@@ -162,15 +163,23 @@ def build_audit_event(
 
 
 @app.post("/v1/run-demo", response_model=RunDemoResponse)
-def run_demo(request: RunDemoRequest) -> RunDemoResponse:
+def run_demo(
+    request: RunDemoRequest,
+    audit_sink: AuditSink = Depends(get_audit_sink),
+) -> RunDemoResponse:
     decision = evaluate_tool(request)
+    executed = decision.allowed
+    audit_event = build_audit_event(request, decision, executed=executed)
+
+    # Persist only the validated, bounded AuditEvent after policy is known.
+    audit_sink.write(audit_event)
 
     if not decision.allowed:
         return RunDemoResponse(
             request_id=request.request_id,
             decision=decision,
             executed=False,
-            audit_event=build_audit_event(request, decision, executed=False),
+            audit_event=audit_event,
         )
 
     simulated_result = {
@@ -183,5 +192,5 @@ def run_demo(request: RunDemoRequest) -> RunDemoResponse:
         decision=decision,
         executed=True,
         result=simulated_result,
-        audit_event=build_audit_event(request, decision, executed=True),
+        audit_event=audit_event,
     )
