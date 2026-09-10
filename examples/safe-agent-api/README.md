@@ -96,7 +96,7 @@ Esse file sink existe para **demos locais e testes**. Não deve ser tratado como
 
 ## Verification-first Task Contract
 
-O exemplo também mantém um contrato explícito de tarefa em `app/task_contract.py` e golden cases versionados em `evals/golden_cases.json`.
+O exemplo também mantém um contrato explícito de tarefa em `app/task_contract.py` e golden cases versionados em `tests/fixtures/golden_cases.json`.
 
 ```text
 Task Contract
