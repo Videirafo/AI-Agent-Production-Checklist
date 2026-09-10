@@ -7,7 +7,7 @@ from app.task_contract import (
     evaluate_golden_suite,
 )
 
-FIXTURE = Path(__file__).resolve().parents[1] / "evals" / "golden_cases.json"
+FIXTURE = Path(__file__).resolve().parent / "fixtures" / "golden_cases.json"
 
 
 def load_suite() -> GoldenSuite:
