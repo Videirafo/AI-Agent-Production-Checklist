@@ -1,0 +1,108 @@
+{
+  "contract": {
+    "id": "safe-agent-policy-v1",
+    "objective": "Verify deterministic authorization outcomes before changing agent runtime behavior.",
+    "success_criteria": [
+      "tenant isolation remains fail-closed",
+      "sensitive notification requires human approval",
+      "approved safe actions may execute",
+      "destructive actions remain blocked"
+    ],
+    "stop_criteria": [
+      "stop on any golden-case mismatch",
+      "stop when the task budget is exceeded"
+    ],
+    "budget": {
+      "max_turns": 1,
+      "max_tool_calls": 1,
+      "max_time_ms": 5000
+    }
+  },
+  "cases": [
+    {
+      "id": "same-tenant-read",
+      "request": {
+        "request_id": "golden-read-allowed",
+        "actor_tenant_id": "alpha",
+        "resource_tenant_id": "alpha",
+        "tool": "read_record",
+        "human_approved": false
+      },
+      "expected": {
+        "terminal_state": "PASS",
+        "allowed": true,
+        "executed": true,
+        "reason": "policy_allowed",
+        "requires_human_approval": false
+      }
+    },
+    {
+      "id": "cross-tenant-read",
+      "request": {
+        "request_id": "golden-cross-tenant",
+        "actor_tenant_id": "alpha",
+        "resource_tenant_id": "beta",
+        "tool": "read_record",
+        "human_approved": false
+      },
+      "expected": {
+        "terminal_state": "BLOCKED",
+        "allowed": false,
+        "executed": false,
+        "reason": "tenant_mismatch",
+        "requires_human_approval": false
+      }
+    },
+    {
+      "id": "notification-needs-human",
+      "request": {
+        "request_id": "golden-notification-review",
+        "actor_tenant_id": "alpha",
+        "resource_tenant_id": "alpha",
+        "tool": "send_notification",
+        "human_approved": false
+      },
+      "expected": {
+        "terminal_state": "NEEDS_HUMAN",
+        "allowed": false,
+        "executed": false,
+        "reason": "human_approval_required",
+        "requires_human_approval": true
+      }
+    },
+    {
+      "id": "approved-notification",
+      "request": {
+        "request_id": "golden-notification-approved",
+        "actor_tenant_id": "alpha",
+        "resource_tenant_id": "alpha",
+        "tool": "send_notification",
+        "human_approved": true
+      },
+      "expected": {
+        "terminal_state": "PASS",
+        "allowed": true,
+        "executed": true,
+        "reason": "policy_allowed",
+        "requires_human_approval": false
+      }
+    },
+    {
+      "id": "destructive-delete-blocked",
+      "request": {
+        "request_id": "golden-delete-blocked",
+        "actor_tenant_id": "alpha",
+        "resource_tenant_id": "alpha",
+        "tool": "delete_record",
+        "human_approved": true
+      },
+      "expected": {
+        "terminal_state": "BLOCKED",
+        "allowed": false,
+        "executed": false,
+        "reason": "destructive_tool_disabled_in_demo",
+        "requires_human_approval": false
+      }
+    }
+  ]
+}
