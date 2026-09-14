@@ -71,7 +71,7 @@ jobs:
           ls -lh assets/demo/safe-agent-playground.png assets/demo/safe-agent-demo.gif
 
       - name: Upload verified assets
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: safe-agent-demo-assets
           path: |
