@@ -4,7 +4,7 @@ version = "0.6.0"
 description = "Deterministic safety policy demo for AI agent tool execution"
 requires-python = ">=3.12"
 dependencies = [
-  "fastapi[standard]==0.141.1",
+  "fastapi[standard]==0.143.0",
 ]
 
 [project.optional-dependencies]
